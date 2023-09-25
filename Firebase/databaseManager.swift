@@ -17,7 +17,7 @@ public struct DatabaseManager {
     private let ref = Database.database().reference()
     
     func createUser(user: User){
-        
+          
         getAllUsers { userData in
             if let userList = userData {
                 print("1")
