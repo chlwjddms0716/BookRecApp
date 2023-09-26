@@ -19,6 +19,22 @@ class MyBookCell: UICollectionViewCell {
         }
     }
     
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        configureUI()
+    }
+    
+    func configureUI(){
+        
+        coverImageView.layer.borderColor = UIColor(hexCode: "EFEDED").cgColor
+        coverImageView.layer.borderWidth = 1
+        
+        coverImageView.clipsToBounds = true
+        coverImageView.layer.cornerRadius = 5
+        
+    }
+    
     func setupDatas(){
         
         if let book = book {

@@ -22,8 +22,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     
                     // 탭바 아이템
                     if let tbItems = tbc.tabBar.items {
-                        tbItems[0].image = UIImage(systemName: "star")?.resized(to: CGSize(width: 25, height: 20), tintColor: UIColor(hexCode: "CCCCCC"))
-                        tbItems[1].image = UIImage(systemName: "house")?.resized(to: CGSize(width: 35, height: 30), tintColor: UIColor(hexCode: "CCCCCC"))
+                        tbItems[0].image = UIImage(systemName: "magnifyingglass")?.resized(to: CGSize(width: 25, height: 20), tintColor: UIColor(hexCode: "CCCCCC"))
+                        tbItems[1].image = UIImage(systemName: "house")?.resized(to: CGSize(width: 25, height: 20), tintColor: UIColor(hexCode: "CCCCCC"))
                         tbItems[2].image = UIImage(systemName: "person")?.resized(to: CGSize(width: 25, height: 20), tintColor: UIColor(hexCode: "CCCCCC"))
                         
                         // 탭바 아이템의 타이틀 설정

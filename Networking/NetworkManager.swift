@@ -18,40 +18,94 @@ public struct NetworkManager{
     static let shared = NetworkManager()
     private init(){}
     
-    
-    
     typealias NetworkCompletion = (Result<[Book], NetworkError>) -> (Void)
     typealias BookDescriptionNetworkCompletion = (Result<String, NetworkError>) -> (Void)
+    typealias DetailBookNetworkCompletion = (Result<Book?, NetworkError>) -> (Void)
     
+    // MARK: - 메인화면에 표시할 대출 인기 도서
     func fetchBook(completion: @escaping NetworkCompletion) {
         
         let url = "\(BookApi.allBookURL)&\(BookApi.apiKeyParam)&\(BookApi.sizeParam)"
         print(url)
-        getBook(url) { result in
+        getPopularBookList(url) { result in
             completion(result)
         }
     }
     
+    // MARK: - 도서 검색
     func searchBook(keyword: String, completion: @escaping NetworkCompletion){
         
         let url = "\(BookApi.searchBookURL)&\(BookApi.apiKeyParam)&\(BookApi.sizeParam)&keyword=\(keyword)"
         print(url)
-        getBook(url) { result in
+        getPopularBookList(url) { result in
             completion(result)
         }
     }
     
+    // MARK: - 도서 상세설명
     func getBookDescription(isbn: String, completion: @escaping BookDescriptionNetworkCompletion ){
         
         let url = "\(BookApi.searchBookDescriptionURL)&\(BookApi.apiKeyParam)&isbn13=\(isbn)"
         print(url)
-        getDescription(url) {
+        getDetailBook(url) {
             result in
-            completion(result)
+            
+            switch result {
+            case .success(let book):
+                if let bookData = book, let bookDescription = bookData.description{
+                    completion(.success(bookDescription))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
         }
     }
     
-    private func getDescription(_ searchUrl: String, completion: @escaping BookDescriptionNetworkCompletion ){
+    // MARK: - 서재에 담긴 도서 리스트
+    func getMyBookList(bookList: [SelectBook], completion: @escaping ([Book]) -> (Void) ){
+        
+        var loadNum = 0
+        var bookArray: [Book] = []
+        for book in bookList {
+            
+            let url = "\(BookApi.searchBookDescriptionURL)&\(BookApi.apiKeyParam)&isbn13=\(book.isbn)"
+            print(url)
+           getDetailBook(url) {
+                result in
+                
+                switch result {
+                case .success(let bookData) :
+                    if var safeBook = bookData {
+                        safeBook.timestamp = book.timestamp
+                        bookArray.append(safeBook)
+                    }
+                    break
+                case .failure(_):
+                    print(book.isbn + " 도서 가져오기 실패")
+                }
+                loadNum += 1
+                
+                if loadNum == bookList.count {
+                    
+                    let sortedSelectBooks = bookArray.sorted(by: { term1, term2 in
+                        if let firstTime = term1.timestamp, let secondTime = term2.timestamp{
+                           return firstTime > secondTime
+                        }
+                        else
+                        {
+                            return true
+                        }
+                    })
+                    completion(sortedSelectBooks)
+                    return
+                }
+            }
+        }
+    }
+
+    
+    // MARK: - 도서관정보나루 : 도서 상세 조회
+    private func getDetailBook(_ searchUrl: String, completion: @escaping DetailBookNetworkCompletion ){
         
         guard let url = URL(string: searchUrl) else { return }
         
@@ -68,8 +122,8 @@ public struct NetworkManager{
                 return
             }
             
-            if let bookDescription = parseJSON2(safeData){
-                completion(.success(bookDescription))
+            if let bookData = parseJSONToDetailBook(safeData) {
+                completion(.success(bookData))
                 return
             }
             else
@@ -81,34 +135,9 @@ public struct NetworkManager{
         
     }
     
-   private func parseJSON2(_ bookData: Data) -> String? {
-        
-        do {
-            if let json = try JSONSerialization.jsonObject(with: bookData) as? [String: Any] {
-                if let boxOfficeResult = json["response"] as? [String: Any] {
-                    if let dailyBoxOfficeList = boxOfficeResult["detail"] as? [[String: Any]] {
-                        for item in dailyBoxOfficeList {
-                            if let bookData = item["book"] as? [String: Any] {
-                                let descripData = bookData["description"] as! String?
-                                
-                                return descripData
-                            }
-                        }
-                    }
-                }
-            }
-            
-            return nil
-            
-        } catch {
-            
-            return nil
-        }
-        
-    }
     
-    
-   private func getBook(_ searchUrl: String, completion: @escaping NetworkCompletion ){
+    // MARK: - 도서관정보나루 : 인기대출도서 조회, 도서 키워드 검색
+   private func getPopularBookList(_ searchUrl: String, completion: @escaping NetworkCompletion ){
         
         guard let url = URL(string: searchUrl) else { return }
         
@@ -138,7 +167,8 @@ public struct NetworkManager{
         
     }
     
-   private func parseJSON(_ bookData: Data) -> [Book]? {
+    // MARK: - 인기대출도서조회 Json형식으로 변환
+    private func parseJSON(_ bookData: Data) -> [Book]? {
         
         do {
             let bookData = try JSONDecoder().decode(ResponseData.self, from: bookData)
@@ -159,5 +189,20 @@ public struct NetworkManager{
         }
     }
     
+    // MARK: - 도서 상세 조회 Json형식으로 변환
+    private func parseJSONToDetailBook(_ bookData: Data) -> Book? {
+        
+        do {
+            let bookData = try JSONDecoder().decode(DetailResponseData.self, from: bookData)
+           
+            var detailBook: Book? = bookData.response.detail.first?.book
+            
+            return detailBook
+            
+        } catch {
+            print(error.localizedDescription)
+            return nil
+        }
+    }
 }
 

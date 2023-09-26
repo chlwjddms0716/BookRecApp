@@ -7,20 +7,32 @@
 
 import Foundation
 
-// MARK: - Welcome
+
+// MARK: - 인기도서 stuct
 struct ResponseData: Codable {
     let response: Response
 }
 
-// MARK: - Response
 struct Response: Codable {
     let resultNum: Int?
     let docs: [BookData]
 }
 
-// MARK: - DocElement
 struct BookData: Codable {
     let doc: Book?
+}
+
+// MARK: - 도서 상세정보 struct
+struct DetailResponseData: Codable {
+    let response: DetailResponse
+}
+
+struct DetailResponse: Codable {
+    let detail: [Detail]
+}
+
+struct Detail: Codable {
+    let book: Book?
 }
 
 // MARK: - DocDoc
@@ -29,6 +41,8 @@ struct Book: Codable {
     let isbn: String?
     let bookImageURL: String?
     let description: String?
+    var timestamp: Int?
+
 
     enum CodingKeys: String, CodingKey {
         case ranking, authors, publisher, bookImageURL

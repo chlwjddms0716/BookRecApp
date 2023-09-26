@@ -9,18 +9,84 @@ import UIKit
 import FirebaseAuth
 
 class MyViewController: UIViewController {
+
     
+    @IBOutlet weak var guideLabel: UILabel!
+    @IBOutlet weak var loadingIndicatorView: UIActivityIndicatorView!
+    @IBOutlet weak var myCollectionView: UICollectionView!
     @IBOutlet weak var logoutButton: UIButton!
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var userImageView: UIImageView!
     
+    let flowLayout = UICollectionViewFlowLayout()
+    
+    let networkManager = NetworkManager.shared
+    
     let databaseManager = DatabaseManager.shared
+    var bookArray: [Book] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         print(#function)
         
         configureUI()
+        setupCollectionView()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        print(#function)
+        
+        setUserInfo()
+        getBookData()
+    }
+    
+    func showIndicator(){
+        loadingIndicatorView.isHidden = false
+        loadingIndicatorView.startAnimating()
+    }
+    
+    func hideIndicator(){
+        loadingIndicatorView.isHidden = true
+        loadingIndicatorView.stopAnimating()
+    }
+    
+    func getBookData(){
+        bookArray = []
+        DispatchQueue.main.async {
+            self.myCollectionView.reloadData()
+        }
+        
+        if let user = Auth.auth().currentUser {
+            showIndicator()
+            self.guideLabel.isHidden = true
+            
+            databaseManager.getSelectBook { bookData in
+                if let books = bookData {
+                    self.networkManager.getMyBookList(bookList: books) {  bookData in
+                        self.bookArray = bookData
+                        
+                        DispatchQueue.main.async {
+                            self.hideIndicator()
+                            self.myCollectionView.reloadData()
+                            self.guideLabel.isHidden = true
+                        }
+                    }
+                }
+                else
+                {
+                    DispatchQueue.main.async {
+                        self.hideIndicator()
+                        self.guideLabel.isHidden = false
+                        self.guideLabel.text = "도서를 서재에 담아보세요!"
+                    }
+                }
+            }
+        }
+        else{
+            DispatchQueue.main.async {
+                self.hideIndicator()
+            }
+        }
     }
     
     func configureUI(){
@@ -32,6 +98,9 @@ class MyViewController: UIViewController {
             object: nil
         )
         
+        guideLabel.textColor = .gray
+        guideLabel.text = "로그인하여 내 서재를 확인해보세요!"
+        
         userImageView.clipsToBounds = true
         userImageView.layer.cornerRadius = userImageView.frame.width / 2
         
@@ -39,16 +108,25 @@ class MyViewController: UIViewController {
         logoutButton.layer.cornerRadius = logoutButton.frame.height / 2
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        print(#function)
+    func setupCollectionView(){
         
-        databaseManager.getSelectBook{
-            result in
-            
-        }
+        myCollectionView.dataSource = self
+        myCollectionView.backgroundColor = .white
+        // 컬렉션뷰의 스크롤 방향 설정
+        flowLayout.scrollDirection = .vertical
         
-        setUserInfo()
+        let collectionCellWidth = (UIScreen.main.bounds.width - CVCell.spacingWitdh * (CVCell.cellColumns - 1)) / CVCell.cellColumns
+        
+        flowLayout.itemSize = CGSize(width: collectionCellWidth, height: collectionCellWidth + CVCell.addHeight )
+        // 아이템 사이 간격 설정
+        flowLayout.minimumInteritemSpacing = CVCell.spacingWitdh
+        // 아이템 위아래 사이 간격 설정
+        flowLayout.minimumLineSpacing = CVCell.spacingWitdh
+        
+        // 컬렉션뷰의 속성에 할당
+        myCollectionView.collectionViewLayout = flowLayout
     }
+    
     
     @objc func didDismissLoginNotification(_ notification: Notification) {
         DispatchQueue.main.async {
@@ -99,6 +177,7 @@ class MyViewController: UIViewController {
         
         nameLabel.textColor = .black
         nameLabel.text = user.displayName
+      
         
         UIImage().loadImage(imageUrl: user.photoURL?.absoluteString){ image in
             DispatchQueue.main.async {
@@ -107,8 +186,9 @@ class MyViewController: UIViewController {
         }
         
         nameLabel.gestureRecognizers = nil
-        
         self.logoutButton.isHidden = false
+        
+        getBookData()
     }
     
     func setLogoutUI(){
@@ -117,6 +197,8 @@ class MyViewController: UIViewController {
         
         nameLabel.textColor = .gray
         nameLabel.text = "로그인하기"
+        guideLabel.isHidden = false
+        
         userImageView.image = nil
         
         if nameLabel.gestureRecognizers == nil {
@@ -127,5 +209,28 @@ class MyViewController: UIViewController {
         }
         
         self.logoutButton.isHidden = true
+        
+        bookArray = []
+        DispatchQueue.main.async {
+            self.myCollectionView.reloadData()
+        }
     }
 }
+
+extension MyViewController : UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+       return bookArray.count
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        guard let cell = myCollectionView.dequeueReusableCell(withReuseIdentifier: Cell.myBookCellIdentifier, for: indexPath) as? MyBookCell else { return UICollectionViewCell() }
+        
+        cell.book = bookArray[indexPath.row]
+        
+        return cell
+    }
+}
+
+

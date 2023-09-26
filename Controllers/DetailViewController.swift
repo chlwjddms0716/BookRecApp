@@ -17,6 +17,7 @@ class DetailViewController: UIViewController {
     @IBOutlet weak var coverImageView: UIImageView!
     
     let networkManager = NetworkManager.shared
+    let databaseManager = DatabaseManager.shared
     
     var book: Book? {
         didSet{
@@ -79,9 +80,29 @@ class DetailViewController: UIViewController {
         }
     }
 
-    
+    // MARK: - 서재에 담기 버튼 클릭
     @IBAction func selectButtonTapped(_ sender: UIButton) {
         
-        
+        if let bookData = book, let bookIsbn = bookData.isbn {
+            databaseManager.insertSelectBook(bookIsbn: bookIsbn) {  result in
+                
+                var alertMsg = ""
+                switch result {
+                case .success(_) :
+                    alertMsg = "도서 담기 성공하였습니다."
+                case .failure(let error) :
+                    alertMsg = error == DatabaseError.existBookError ? "이미 서재에 추가된 도서입니다." : "도서 담기 실패하였습니다.\r\n다시 시도해주세요."
+                }
+                
+                let alert = UIAlertController(title: "도서 서재에 담기", message: alertMsg, preferredStyle: .alert)
+                
+                let success = UIAlertAction(title: "확인", style: .default) { action in
+                    self.dismiss(animated: true)
+                }
+                
+                alert.addAction(success)
+                self.present(alert, animated: true)
+            }
+        }
     }
 }

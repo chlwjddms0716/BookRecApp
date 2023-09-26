@@ -1,63 +1,60 @@
 //
-//  ViewController.swift
+//  SearchBookViewController.swift
 //  BookRecApp
 //
-//  Created by 최정은 on 2023/09/24.
+//  Created by 최정은 on 2023/09/26.
 //
 
 import UIKit
 
-class ViewController: UIViewController {
-    
-    @IBOutlet weak var loadingIndicatorVIew: UIActivityIndicatorView!
-    
+class SearchBookViewController: UIViewController {
+
     @IBOutlet weak var bookTableView: UITableView!
+    
+    let networkManager = NetworkManager.shared
+    let databaseManager = DatabaseManager.shared
+    
+    var keyword: String? {
+        didSet{
+            setupDatas()
+        }
+    }
     
     var bookArray: [Book] = []
     
-    let networkManager = NetworkManager.shared
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        setupDatas()
+
         setupTableView()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        bookTableView.reloadData()
-    }
-    
-    func showIndicator(){
-        loadingIndicatorVIew.isHidden = false
-        loadingIndicatorVIew.startAnimating()
-    }
-    
-    func hideIndicator(){
-        loadingIndicatorVIew.isHidden = true
-        loadingIndicatorVIew.stopAnimating()
-    }
-
     func setupTableView(){
         bookTableView.delegate = self
         bookTableView.dataSource = self
     }
     
     func setupDatas(){
-        showIndicator()
         
-        networkManager.fetchBook { result in
-            
-            switch result {
-            case .success(let bookArray):
-                self.bookArray = bookArray
-                
-                DispatchQueue.main.async{
+        guard let keyword = keyword else { return }
+        
+        if keyword == "" {
+            self.bookArray = []
+            DispatchQueue.main.async {
+                self.bookTableView.reloadData()
+            }
+            return
+        }
+        
+        databaseManager.insertSearchKeyword(keyword: keyword)
+        
+        networkManager.searchBook (keyword: keyword){ result in
+            switch result{
+            case .success(let bookData):
+                self.bookArray = bookData
+
+                DispatchQueue.main.async {
                     self.bookTableView.reloadData()
-                    self.hideIndicator()
                 }
-                
             case .failure(let error):
                 print(error.localizedDescription)
             }
@@ -65,15 +62,14 @@ class ViewController: UIViewController {
     }
 }
 
-
 // MARK: - 테이블뷰 DataSource
-extension ViewController: UITableViewDataSource{
+extension SearchBookViewController: UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return bookArray.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = bookTableView.dequeueReusableCell(withIdentifier: Cell.bookCellIdentifier, for: indexPath) as! bookCell
+        let cell = bookTableView.dequeueReusableCell(withIdentifier: Cell.searchBookCellIdentifier, for: indexPath) as! SearchCell
         
         cell.bookData = bookArray[indexPath.row]
         
@@ -84,7 +80,7 @@ extension ViewController: UITableViewDataSource{
 }
 
 // MARK: - 테이블뷰 Delegate
-extension ViewController: UITableViewDelegate{
+extension SearchBookViewController: UITableViewDelegate{
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 120
@@ -98,4 +94,3 @@ extension ViewController: UITableViewDelegate{
         self.present(vc, animated: true)
     }
 }
-

@@ -34,13 +34,9 @@ class LoginViewController: UIViewController {
         
         googleLoginButton.clipsToBounds = true
         googleLoginButton.layer.cornerRadius = googleLoginButton.frame.height / 4
-        //googleLoginButton.layer.borderWidth = 1
-        //googleLoginButton.layer.borderColor = UIColor(hexCode: "CCCCCC").cgColor
-        
+      
         appleLoginButton.clipsToBounds = true
         appleLoginButton.layer.cornerRadius = appleLoginButton.frame.height / 4
-        //appleLoginButton.layer.borderWidth = 1
-        //appleLoginButton.layer.borderColor = UIColor(hexCode: "CCCCCC").cgColor
     }
 
     // MARK: - 구글 로그인 버튼 클릭
