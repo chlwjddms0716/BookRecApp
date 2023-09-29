@@ -28,10 +28,6 @@ struct DetailResponseData: Codable {
 }
 
 struct DetailResponse: Codable {
-    let detail: [Detail]
-}
-
-struct Detail: Codable {
     let book: Book?
 }
 
@@ -42,13 +38,18 @@ struct Book: Codable {
     let bookImageURL: String?
     let description: String?
     var timestamp: Int?
-
-
+    let publicationYear: String?
+    let classNo: String?
+    let loanCnt: Int?
+    
     enum CodingKeys: String, CodingKey {
         case ranking, authors, publisher, bookImageURL
         case title = "bookname"
         case isbn = "isbn13"
         case description
+        case publicationYear = "publication_year"
+        case classNo = "class_no"
+        case loanCnt
     }
 }
 

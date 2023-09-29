@@ -37,20 +37,20 @@ class LoginViewController: UIViewController {
     func configureUI(){
         
         googleLoginButton.clipsToBounds = true
-        googleLoginButton.layer.cornerRadius = 5
+        googleLoginButton.layer.cornerRadius = RadiusNumber.buttonRadiusNum
         googleLoginButton.layer.borderColor = UIColor(hexCode: Color.grayColor).cgColor
         googleLoginButton.layer.borderWidth = 1
       
         closeButton.tintColor = UIColor(hexCode: Color.mainColor)
         
         emailTextField.clipsToBounds = true
-        emailTextField.layer.cornerRadius = 5
+        emailTextField.layer.cornerRadius = RadiusNumber.buttonRadiusNum
         
         pwTextField.clipsToBounds = true
-        pwTextField.layer.cornerRadius = 5
+        pwTextField.layer.cornerRadius = RadiusNumber.buttonRadiusNum
         
         emailLoginButton.clipsToBounds = true
-        emailLoginButton.layer.cornerRadius = 5
+        emailLoginButton.layer.cornerRadius = RadiusNumber.buttonRadiusNum
         emailLoginButton.backgroundColor = UIColor(hexCode: Color.mainColor)
         
         emailLoginButton.layer.shadowColor = UIColor.black.cgColor

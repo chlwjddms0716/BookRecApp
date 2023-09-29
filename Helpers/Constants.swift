@@ -24,7 +24,7 @@ public struct BookApi{
     
     static let allBookURL = "https://data4library.kr/api/loanItemSrch?format=json&pageNo=1"
     static let searchBookURL = "https://data4library.kr/api/srchBooks?format=json"
-    static let searchBookDescriptionURL = "https://data4library.kr/api/srchDtlList?format=json"
+    static let searchBookDescriptionURL = "https://data4library.kr/api/usageAnalysisList?format=json"
     static let monthlyKeywordURL = "https://data4library.kr/api/monthlyKeywords?format=json"
     
     static let apiKeyParam = "authKey=83026cff3c9d40dfccbd982eb52c9c134e2c332abcc02cde1bf1cfdb65149ca4"
@@ -39,7 +39,7 @@ public struct MainCVCell{
     
     static let spacingWitdh: CGFloat = 1
     static let width: CGFloat = 170
-    static let height: CGFloat = 240
+    static let height: CGFloat = 260
     
     private init(){}
 }
@@ -60,6 +60,12 @@ public struct CategoryCVCell {
     private init(){}
 }
 
+public struct RadiusNumber {
+    
+    static let imageRadiusNum: CGFloat = 10
+    static let buttonRadiusNum: CGFloat = 10
+}
+
 public struct Color {
     
     static let grayColor = "F0F0F0"
@@ -67,13 +73,21 @@ public struct Color {
     
     static let imageBorderColor = "EFEDED"
     
-    static let lightMainColor = "EEEDFF"
-    static let mainColor = "413B89"
+    static let mainColor = "0170E4"
+    static let lightMainColor = "DEEAF7"
     
-//    static let lightMainColor = "FFF3F2"
-//    static let mainColor = "FB918A"
+    static let bookBackColor = lightMainColor
     
-    static let bookBackColor = "FAFAFA"
+    // 보라색
+    //    static let lightMainColor = "EEEDFF"
+    //    static let mainColor = "413B89"
+    
+    // 핑크색
+    //    static let lightMainColor = "FFF3F2"
+    //    static let mainColor = "FB918A"
+    
+    // 회색
+    //    static let bookBackColor = "FAFAFA"
     
     private init(){}
 }

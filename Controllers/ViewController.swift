@@ -28,10 +28,13 @@ class ViewController: UIViewController {
        setupTabbar()
        setupDatas()
     }
-
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        bookCollectionView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+        categoryCollectionView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
+        
         bookCollectionView.reloadData()
     }
     
@@ -46,6 +49,10 @@ class ViewController: UIViewController {
                                               , action: #selector(searchBarTapped))
         searchBarView.addGestureRecognizer(searchBarclick)
         searchBarView.isUserInteractionEnabled = true
+        
+        let backBarButtonItem = UIBarButtonItem(title: "뒤로", style: .plain, target: self, action: nil)
+        backBarButtonItem.tintColor = UIColor(hexCode: Color.mainColor)
+        self.navigationItem.backBarButtonItem = backBarButtonItem
     }
     
     func setupTabbar(){
@@ -79,10 +86,12 @@ class ViewController: UIViewController {
         bookCollectionView.dataSource = self
         bookCollectionView.delegate = self
         bookCollectionView.register(UINib(nibName: Cell.mainBookCellIdentifier, bundle: nil), forCellWithReuseIdentifier: Cell.mainBookCellIdentifier)
+        bookCollectionView.showsHorizontalScrollIndicator = false
         
         categoryCollectionView.delegate = self
         categoryCollectionView.dataSource = self
         categoryCollectionView.register(UINib(nibName: Cell.categoryCellIdentifier, bundle: nil), forCellWithReuseIdentifier: Cell.categoryCellIdentifier)
+        categoryCollectionView.showsHorizontalScrollIndicator = false
     }
     
     func setupDatas(){
@@ -158,6 +167,7 @@ extension ViewController: UICollectionViewDelegateFlowLayout , UICollectionViewD
         if collectionView == bookCollectionView {
             let vc = storyboard?.instantiateViewController(withIdentifier: "DetailViewController") as! DetailViewController
             vc.book = bookArray[indexPath.row]
+            vc.modalPresentationStyle = .fullScreen
             self.present(vc, animated: true)
         }
         else
@@ -170,7 +180,14 @@ extension ViewController: UICollectionViewDelegateFlowLayout , UICollectionViewD
     
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return CGFloat(-1)
+        
+        if collectionView == categoryCollectionView {
+            return CGFloat(-30)
+        }
+        else{
+            return CGFloat(-20)
+        }
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {

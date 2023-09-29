@@ -7,9 +7,10 @@
 
 import UIKit
 
-class SearchBookViewController: UIViewController {
-
-    @IBOutlet weak var loadingIndicatorVIew: UIActivityIndicatorView!
+class SearchBookViewController: ExtensionVC {
+    
+    weak var sv: UIView!
+    
     @IBOutlet weak var bookTableView: UITableView!
     
    private let networkManager = NetworkManager.shared
@@ -54,20 +55,13 @@ class SearchBookViewController: UIViewController {
     
     func showIndicator(){
         DispatchQueue.main.async {
-            if self.loadingIndicatorVIew !=  nil {
-                self.loadingIndicatorVIew.isHidden = false
-                self.loadingIndicatorVIew.startAnimating()
-            }
+            self.sv = UIViewController.displaySpinner(onView: self.view)
         }
-        
     }
     
     func hideIndicator(){
         DispatchQueue.main.async {
-            if self.loadingIndicatorVIew != nil {
-                self.loadingIndicatorVIew.isHidden = true
-                self.loadingIndicatorVIew.stopAnimating()
-            }
+            self.sv?.removeFromSuperview()
         }
     }
     
@@ -87,13 +81,17 @@ class SearchBookViewController: UIViewController {
         bookTableView.separatorStyle = .none
         
         bookTableView.backgroundColor = UIColor(hexCode: Color.grayColor)
+        bookTableView.showsVerticalScrollIndicator = false
     }
     
     func setupCategoryDatas(){
         guard let category = category else { return }
         
         showIndicator()
+        
+        
         networkManager.fetchCategoryBookList(category: category) { result in
+
             switch result {
             case .success(let bookData) :
                 self.bookArray = bookData
@@ -140,6 +138,7 @@ class SearchBookViewController: UIViewController {
     }
 }
 
+
 // MARK: - 테이블뷰 DataSource
 extension SearchBookViewController: UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -169,6 +168,7 @@ extension SearchBookViewController: UITableViewDelegate{
        guard let vc = storyboard?.instantiateViewController(withIdentifier: "DetailViewController") as? DetailViewController else { return }
         
         vc.book = bookArray[indexPath.row]
+        vc.modalPresentationStyle = .fullScreen
         self.present(vc, animated: true)
     }
     

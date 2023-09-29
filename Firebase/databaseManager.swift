@@ -21,6 +21,7 @@ public struct DatabaseManager {
     
     private let ref = Database.database().reference()
     
+    // MARK: - 이용자 추가
     func createUser(user: User){
         let userItemRef = ref.child("User").child(user.uid)
         let dataToSave: [String: Any] = [
@@ -47,6 +48,7 @@ public struct DatabaseManager {
         }
     }
     
+    // MARK: - 전체 이용자 가져오기
     func getAllUsers(completion: @escaping ([String]?) -> (Void)){
         ref.child("User").observeSingleEvent(of: .value, with: { snapshot in
             guard let value = snapshot.value as? [String: Any] else {
@@ -139,12 +141,24 @@ public struct DatabaseManager {
             "timestamp" : Date().timeIntervalSince1970.rounded()
         ]
         
-        ref.child("User").child(user.uid).child("searchHistory").childByAutoId().updateChildValues(data) { (error, reference) in
+        
+        getSearchHistory { result in
             
-            if let error = error {
-                print(error.localizedDescription)
-            } else {
-               print("Keyword Update Success")
+            if let resultData = result {
+                for keywordData in resultData {
+                    if  keywordData.term == keyword {
+                        return
+                    }
+                }
+            }
+            
+            ref.child("User").child(user.uid).child("searchHistory").childByAutoId().updateChildValues(data) { (error, reference) in
+                
+                if let error = error {
+                    print(error.localizedDescription)
+                } else {
+                   print("Keyword Update Success")
+                }
             }
         }
     }
@@ -152,7 +166,9 @@ public struct DatabaseManager {
     // MARK: - 검색한 키워드 가져오기
     func getSearchHistory(completion: @escaping ([SearchHistory]?) -> (Void)){
         
-        guard let userID = Auth.auth().currentUser?.uid else { return }
+        guard let userID = Auth.auth().currentUser?.uid else { 
+            completion(nil)
+            return }
         
         ref.child("User").child(userID).child("searchHistory").observeSingleEvent(of: .value, with: { snapshot in
            
@@ -190,6 +206,7 @@ public struct DatabaseManager {
         }
     }
     
+    // MARK: - 키워드 삭제
     func removeByKeyword(searhData: SearchHistory, completion: @escaping () -> (Void)){
         guard let user = Auth.auth().currentUser else { return }
         
@@ -203,6 +220,7 @@ public struct DatabaseManager {
         }
     }
     
+    // MARK: - 키워드 전체 삭제
     func removeAllKeyword(){
         guard let user = Auth.auth().currentUser else { return }
         
@@ -215,6 +233,7 @@ public struct DatabaseManager {
         }
     }
     
+    // MARK: - 즐겨찾기 도서 삭제
     func removeMyBook(bookData: Book, completion: @escaping () -> (Void)){
         guard let user = Auth.auth().currentUser else { return }
         

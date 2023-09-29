@@ -44,21 +44,13 @@ public struct NetworkManager{
     }
     
     // MARK: - 도서 상세설명
-    func fetchBookDescription(isbn: String, completion: @escaping BookDescriptionNetworkCompletion ){
+    func fetchBookDescription(isbn: String, completion: @escaping DetailBookNetworkCompletion ){
         
         let url = "\(BookApi.searchBookDescriptionURL)&\(BookApi.apiKeyParam)&isbn13=\(isbn)"
         print(url)
         getDetailBook(url) {
             result in
-            
-            switch result {
-            case .success(let book):
-                if let bookData = book, let bookDescription = bookData.description{
-                    completion(.success(bookDescription))
-                }
-            case .failure(let error):
-                completion(.failure(error))
-            }
+            completion(result)
         }
     }
     
@@ -274,8 +266,7 @@ public struct NetworkManager{
         do {
             let bookData = try JSONDecoder().decode(DetailResponseData.self, from: bookData)
            
-            let detailBook: Book? = bookData.response.detail.first?.book
-            
+            let detailBook: Book? = bookData.response.book
             return detailBook
             
         } catch {

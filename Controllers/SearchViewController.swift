@@ -80,6 +80,7 @@ class SearchViewController: UIViewController {
         keywordCollectionView.delegate = self
         
         keywordCollectionView.register(UINib(nibName: Cell.keywordCellIdentifier, bundle: nil), forCellWithReuseIdentifier: Cell.keywordCellIdentifier)
+        keywordCollectionView.showsHorizontalScrollIndicator = false
         
         let layout = LeftAlignedCollectionViewFlowLayout()
         layout.minimumLineSpacing = 0

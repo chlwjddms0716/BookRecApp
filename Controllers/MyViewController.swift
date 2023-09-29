@@ -13,7 +13,7 @@ class MyViewController: UIViewController {
     
     @IBOutlet weak var guideLabel: UILabel!
     @IBOutlet weak var loadingIndicatorView: UIActivityIndicatorView!
-    @IBOutlet weak var myCollectionView: UICollectionView!
+    @IBOutlet weak var myTableView: UITableView!
     @IBOutlet weak var logoutButton: UIButton!
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var userImageView: UIImageView!
@@ -28,7 +28,7 @@ class MyViewController: UIViewController {
         print(#function)
         
         configureUI()
-        setupCollectionView()
+        setupTableView()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -51,7 +51,7 @@ class MyViewController: UIViewController {
     func getBookData(){
         bookArray = []
         DispatchQueue.main.async {
-            self.myCollectionView.reloadData()
+            self.myTableView.reloadData()
         }
         
         if Auth.auth().currentUser != nil {
@@ -65,7 +65,7 @@ class MyViewController: UIViewController {
                         
                         DispatchQueue.main.async {
                             self.hideIndicator()
-                            self.myCollectionView.reloadData()
+                            self.myTableView.reloadData()
                             self.guideLabel.isHidden = true
                         }
                     }
@@ -106,19 +106,15 @@ class MyViewController: UIViewController {
         logoutButton.layer.cornerRadius = logoutButton.frame.height / 2
     }
     
-    func setupCollectionView(){
+    func setupTableView(){
         
-        myCollectionView.dataSource = self
-        myCollectionView.backgroundColor = .white
+        myTableView.dataSource = self
+        myTableView.delegate = self
         
-        let flowLayout = UICollectionViewFlowLayout()
-        flowLayout.scrollDirection = .vertical
-        let collectionCellWidth = (UIScreen.main.bounds.width - CVCell.spacingWitdh * (CVCell.cellColumns - 1)) / CVCell.cellColumns
-        flowLayout.itemSize = CGSize(width: collectionCellWidth, height: collectionCellWidth + CVCell.addHeight )
-        flowLayout.minimumInteritemSpacing = CVCell.spacingWitdh
-        flowLayout.minimumLineSpacing = CVCell.spacingWitdh
-
-        myCollectionView.collectionViewLayout = flowLayout
+        myTableView.separatorStyle = .none
+        myTableView.showsVerticalScrollIndicator = false
+        
+        myTableView.register(UINib(nibName: Cell.myBookCellIdentifier, bundle: nil), forCellReuseIdentifier: Cell.myBookCellIdentifier)
     }
     
     
@@ -146,6 +142,7 @@ class MyViewController: UIViewController {
     @objc func loginButtonTapped(){
        
         guard let loginVC = storyboard?.instantiateViewController(identifier: "LoginViewController") as? LoginViewController else { return }
+        loginVC.modalPresentationStyle = .fullScreen
         self.present(loginVC, animated: true)
     }
     
@@ -206,24 +203,40 @@ class MyViewController: UIViewController {
         
         bookArray = []
         DispatchQueue.main.async {
-            self.myCollectionView.reloadData()
+            self.myTableView.reloadData()
         }
     }
 }
 
-extension MyViewController : UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-       return bookArray.count
-        
+extension MyViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 130
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        guard let cell = myCollectionView.dequeueReusableCell(withReuseIdentifier: Cell.myBookCellIdentifier, for: indexPath) as? MyBookCell else { return UICollectionViewCell() }
+       guard let vc = storyboard?.instantiateViewController(withIdentifier: "DetailViewController") as? DetailViewController else { return }
+        
+        vc.book = bookArray[indexPath.row]
+        vc.modalPresentationStyle = .fullScreen
+        self.present(vc, animated: true)
+    }
+    
+}
+
+extension MyViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return bookArray.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        guard let cell = myTableView.dequeueReusableCell(withIdentifier: Cell.myBookCellIdentifier, for: indexPath) as? MyBookCell else { return UITableViewCell() }
+        
         cell.removeButtonPressed = { book in
             self.bookArray.removeAll(where: {$0.isbn == book.isbn})
             DispatchQueue.main.async {
-                self.myCollectionView.reloadData()
+                self.myTableView.reloadData()
                 if self.bookArray.count == 0 {
                     self.guideLabel.isHidden = false
                     self.guideLabel.text = "도서를 서재에 담아보세요!"
@@ -235,9 +248,9 @@ extension MyViewController : UICollectionViewDataSource {
         }
         
         cell.book = bookArray[indexPath.row]
+        cell.selectionStyle = .none
         
         return cell
     }
 }
-
 

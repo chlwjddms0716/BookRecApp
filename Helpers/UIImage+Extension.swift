@@ -34,14 +34,21 @@ extension UIImage {
         }
     }
     
+    func setCategoryImage(imageName: String) -> UIImage {
+        guard let image = UIImage(named: imageName) else { return UIImage() }
+        return image.withTintColor(UIColor(hexCode: Color.mainColor), renderingMode: .alwaysOriginal)
+    }
+    
     func loadImage(imageUrl: String?, isUser: Bool = false, completion: @escaping (UIImage) -> Void ) {
         
         if let imgUrl = imageUrl, let url = URL(string: imgUrl){
             DispatchQueue.global().async {
                 if let data = try? Data(contentsOf: url) {
-                    if let image = UIImage(data: data) {
-                        completion(image)
-                        return
+                    if imgUrl == url.absoluteString  {
+                        if let image = UIImage(data: data) {
+                            completion(image)
+                            return
+                        }
                     }
                 }
             }

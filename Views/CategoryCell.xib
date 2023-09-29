@@ -18,7 +18,7 @@
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0om-WA-TzH">
-                        <rect key="frame" x="10" y="0.0" width="338" height="63"/>
+                        <rect key="frame" x="20" y="0.0" width="308" height="63"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B0b-8F-fxO">
                                 <rect key="frame" x="15" y="16.666666666666668" width="30" height="30.000000000000004"/>
@@ -38,7 +38,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MM4-kW-kXc">
-                                <rect key="frame" x="55" y="16.666666666666668" width="268" height="30.000000000000004"/>
+                                <rect key="frame" x="55" y="16.666666666666668" width="238" height="30.000000000000004"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -59,8 +59,8 @@
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
             <constraints>
                 <constraint firstAttribute="bottom" secondItem="0om-WA-TzH" secondAttribute="bottom" id="FJs-oi-rNi"/>
-                <constraint firstItem="0om-WA-TzH" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="10" id="Sp0-E3-sLu"/>
-                <constraint firstAttribute="trailing" secondItem="0om-WA-TzH" secondAttribute="trailing" id="bkn-z7-s6z"/>
+                <constraint firstItem="0om-WA-TzH" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="20" id="Sp0-E3-sLu"/>
+                <constraint firstAttribute="trailing" secondItem="0om-WA-TzH" secondAttribute="trailing" constant="20" id="bkn-z7-s6z"/>
                 <constraint firstItem="0om-WA-TzH" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="iLQ-gi-4vp"/>
             </constraints>
             <size key="customSize" width="348" height="63"/>

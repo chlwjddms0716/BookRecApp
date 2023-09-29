@@ -10,10 +10,14 @@ import UIKit
 class DetailViewController: UIViewController {
     
     
+    @IBOutlet weak var classNoLabel: UILabel!
+    @IBOutlet weak var loanCountLabel: UILabel!
+    @IBOutlet weak var publisherYearLabel: UILabel!
+    
     @IBOutlet weak var closeButton: UIButton!
     @IBOutlet weak var backView: UIView!
     @IBOutlet weak var selectButton: UIButton!
-    @IBOutlet weak var descriptionLabel: UILabel!
+    @IBOutlet weak var descriptionLabel: VerticalAlignLabel!
     @IBOutlet weak var authorLabel: UILabel!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var coverImageView: UIImageView!
@@ -47,12 +51,14 @@ class DetailViewController: UIViewController {
             })
         }
         
-        coverImageView.layer.cornerRadius = 5
+        descriptionLabel.verticalAlignment = .top
+        
+        coverImageView.layer.cornerRadius = RadiusNumber.imageRadiusNum
         coverImageView.layer.borderWidth = 1
         coverImageView.clipsToBounds = true
         coverImageView.layer.borderColor = UIColor(hexCode: "EFEDED").cgColor
         
-        selectButton.layer.cornerRadius = 10
+        selectButton.layer.cornerRadius = RadiusNumber.buttonRadiusNum
         selectButton.clipsToBounds = true
         selectButton.backgroundColor =  UIColor(hexCode: Color.mainColor)
         selectButton.setTitleColor(.white, for: .normal)
@@ -68,21 +74,26 @@ class DetailViewController: UIViewController {
     
     func setupData(){
         if let book = book, let bookISBN = book.isbn {
-            
             networkManager.fetchBookDescription(isbn: bookISBN ){ result in
                 switch result{
                 case .success(let bookData):
-                    
-                    print(bookData)
+                    guard let book = bookData else { return }
                     DispatchQueue.main.async {
-                        self.descriptionLabel.text = bookData
+                        self.descriptionLabel.text = book.description
+                        
+                        self.publisherYearLabel.text = book.publicationYear ?? "-"
+                        self.classNoLabel.text = book.classNo ?? "-"
+                        if let loanCnt = book.loanCnt {
+                            self.loanCountLabel.text =  String(loanCnt)
+                        }
+                        else{
+                            self.loanCountLabel.text = "-"
+                        }
                     }
                 case .failure(let error):
                     print(error.localizedDescription)
                 }
             }
-            
-            
         }
     }
     

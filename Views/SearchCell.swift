@@ -47,7 +47,7 @@ class SearchCell: UITableViewCell {
         coverImageView.layer.borderWidth = 1
         
         coverImageView.clipsToBounds = true
-        coverImageView.layer.cornerRadius = 5
+        coverImageView.layer.cornerRadius = RadiusNumber.imageRadiusNum
         
         backView.clipsToBounds = true
         backView.layer.cornerRadius = 10

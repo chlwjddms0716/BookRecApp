@@ -30,8 +30,7 @@ class RecKeywordCell: UICollectionViewCell {
         
         backView.clipsToBounds = true
         backView.layer.cornerRadius = backView.frame.height / 2
-        //backView.backgroundColor = UIColor(hexCode: Color.grayColor)
-        
+      
         backView.layer.borderColor = UIColor(.gray).cgColor
         backView.layer.borderWidth = 1
       }
