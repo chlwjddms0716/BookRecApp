@@ -12,10 +12,14 @@ import FirebaseAuth
 
 class LoginViewController: UIViewController {
     
-    @IBOutlet weak var googleLoginButton: UIButton!
-    @IBOutlet weak var appleLoginButton: UIButton!
     
-    let databaseManager = DatabaseManager.shared
+    @IBOutlet weak var emailLoginButton: UIButton!
+    @IBOutlet weak var pwTextField: UITextField!
+    @IBOutlet weak var emailTextField: UITextField!
+    @IBOutlet weak var closeButton: UIButton!
+    @IBOutlet weak var googleLoginButton: UIButton!
+    
+   private let databaseManager = DatabaseManager.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,12 +37,81 @@ class LoginViewController: UIViewController {
     func configureUI(){
         
         googleLoginButton.clipsToBounds = true
-        googleLoginButton.layer.cornerRadius = googleLoginButton.frame.height / 4
+        googleLoginButton.layer.cornerRadius = 5
+        googleLoginButton.layer.borderColor = UIColor(hexCode: Color.grayColor).cgColor
+        googleLoginButton.layer.borderWidth = 1
       
-        appleLoginButton.clipsToBounds = true
-        appleLoginButton.layer.cornerRadius = appleLoginButton.frame.height / 4
+        closeButton.tintColor = UIColor(hexCode: Color.mainColor)
+        
+        emailTextField.clipsToBounds = true
+        emailTextField.layer.cornerRadius = 5
+        
+        pwTextField.clipsToBounds = true
+        pwTextField.layer.cornerRadius = 5
+        
+        emailLoginButton.clipsToBounds = true
+        emailLoginButton.layer.cornerRadius = 5
+        emailLoginButton.backgroundColor = UIColor(hexCode: Color.mainColor)
+        
+        emailLoginButton.layer.shadowColor = UIColor.black.cgColor
+        emailLoginButton.layer.masksToBounds = false
+        emailLoginButton.layer.shadowOffset = CGSize(width: 0, height: 3)
+        emailLoginButton.layer.shadowRadius = 5
+        emailLoginButton.layer.shadowOpacity = 0.3
+        
+        googleLoginButton.layer.shadowColor = UIColor.black.cgColor
+        googleLoginButton.layer.masksToBounds = false
+        googleLoginButton.layer.shadowOffset = CGSize(width: 0, height: 3)
+        googleLoginButton.layer.shadowRadius = 5
+        googleLoginButton.layer.shadowOpacity = 0.1
+        
+        emailTextField.layer.shadowColor = UIColor.black.cgColor
+        emailTextField.layer.masksToBounds = false
+        emailTextField.layer.shadowOffset = CGSize(width: 0, height: 3)
+        emailTextField.layer.shadowRadius = 5
+        emailTextField.layer.shadowOpacity = 0.1
+        
+        pwTextField.layer.shadowColor = UIColor.black.cgColor
+        pwTextField.layer.masksToBounds = false
+        pwTextField.layer.shadowOffset = CGSize(width: 0, height: 3)
+        pwTextField.layer.shadowRadius = 5
+        pwTextField.layer.shadowOpacity = 0.1
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
     }
 
+    // MARK: - 닫기 버튼 클릭
+    @IBAction func closeButtonTapped(_ sender: UIButton) {
+        dismiss(animated: true)
+    }
+    
+    // MARK: - 이메일 로그인 버튼 클릭
+    @IBAction func emailLoginButtonTapped(_ sender: UIButton) {
+        
+        if let email = emailTextField.text, let pw = pwTextField.text {
+            Auth.auth().signIn(withEmail: email, password: pw) { (result, error) in
+                if let error = error {
+                    // 로그인 실패
+                    print("로그인 실패: \(error.localizedDescription)")
+                } else {
+                    if let error = error {
+                        print(error.localizedDescription)
+                        return
+                    }
+                    
+                    if let resultData = result {
+                        
+                        print("이용자 등록 완료 : \(String(describing: resultData.user.displayName))")
+                        self.databaseManager.createUser(user: resultData.user)
+                        self.dismiss(animated: true)
+                    }
+                }
+            }
+        }
+    }
+    
     // MARK: - 구글 로그인 버튼 클릭
     @IBAction func googleLoginButtonTapped(_ sender: UIButton) {
         guard let clientID = FirebaseApp.app()?.options.clientID else { return }
@@ -70,7 +143,7 @@ class LoginViewController: UIViewController {
                     
                     if let resultData = result {
                         
-                        print("이용자 등록 완료 : \(resultData.user.displayName)")
+                        print("이용자 등록 완료 : \(String(describing: resultData.user.displayName))")
                         self.databaseManager.createUser(user: resultData.user)
                         self.dismiss(animated: true)
                     }

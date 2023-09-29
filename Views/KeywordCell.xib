@@ -18,19 +18,19 @@
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eOD-VJ-D0o">
-                        <rect key="frame" x="0.0" y="0.0" width="224" height="145"/>
+                        <rect key="frame" x="20" y="0.0" width="204" height="145"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="DbH-kZ-Fbs">
-                                <rect key="frame" x="10" y="5" width="209" height="135"/>
+                                <rect key="frame" x="10" y="5" width="189" height="135"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WES-Ry-XZt">
-                                        <rect key="frame" x="0.0" y="0.0" width="174" height="135"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="154" height="135"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ahf-gO-doK">
-                                        <rect key="frame" x="179" y="0.0" width="30" height="135"/>
+                                        <rect key="frame" x="159" y="0.0" width="30" height="135"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="30" id="Tay-Na-pbO"/>
                                         </constraints>
@@ -57,13 +57,14 @@
             <constraints>
                 <constraint firstItem="eOD-VJ-D0o" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="2fv-Cn-KMI"/>
                 <constraint firstAttribute="bottom" secondItem="eOD-VJ-D0o" secondAttribute="bottom" id="2zP-4Z-kT0"/>
-                <constraint firstItem="eOD-VJ-D0o" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="Su6-Zg-Fg2"/>
+                <constraint firstItem="eOD-VJ-D0o" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="20" id="Su6-Zg-Fg2"/>
                 <constraint firstAttribute="trailing" secondItem="eOD-VJ-D0o" secondAttribute="trailing" id="bJj-mM-48v"/>
             </constraints>
             <size key="customSize" width="224" height="145"/>
             <connections>
                 <outlet property="backView" destination="eOD-VJ-D0o" id="tUu-Z3-rcy"/>
                 <outlet property="keywordLabel" destination="WES-Ry-XZt" id="k7V-HK-uNC"/>
+                <outlet property="removeButton" destination="Ahf-gO-doK" id="eRM-V1-RrG"/>
             </connections>
             <point key="canvasLocation" x="224.42748091603053" y="19.366197183098592"/>
         </collectionViewCell>

@@ -15,6 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         
         // 윈도우 객체와 연결된 루트뷰컨트롤러 가져오기
+        
                 if let tbc = self.window?.rootViewController as? UITabBarController {
                     
                     // 큰 이미지 자르기: 이미지가 tabBar보다 큰 경우 밖으로 튀어나옴
@@ -29,18 +30,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                         // 탭바 아이템의 타이틀 설정
                         for tbItem in tbItems {
                             tbItem.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.gray], for: .disabled)
-                            tbItem.setTitleTextAttributes([NSAttributedString.Key.foregroundColor : UIColor.black], for: .selected)
+                            tbItem.setTitleTextAttributes([NSAttributedString.Key.foregroundColor : UIColor(hexCode: Color.mainColor)], for: .selected)
                         }
                         
                         // proxy객체 사용 : for문으로 접근하지 않아도 가능
                         // 탭바 아이템에 일일이 할 필요 없이, 일괄적 적용
                         let tbItemProxy = UITabBarItem.appearance()
-                        tbItemProxy.setTitleTextAttributes([NSAttributedString.Key.foregroundColor:UIColor.blue], for: .selected)
-                        tbItemProxy.setTitleTextAttributes([NSAttributedString.Key.foregroundColor:UIColor.gray], for: .disabled)
-                        
                         tbItemProxy.setTitleTextAttributes([NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12)], for: .normal)
                     }
                     
+                    tbc.tabBar.tintColor = UIColor(hexCode: Color.mainColor)
                     tbc.selectedIndex = 1
                 }
                 

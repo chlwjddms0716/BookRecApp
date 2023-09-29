@@ -10,6 +10,7 @@ import UIKit
 class KeywordCell: UICollectionViewCell {
 
    
+    @IBOutlet weak var removeButton: UIButton!
     @IBOutlet weak var keywordLabel: UILabel!
     @IBOutlet weak var backView: UIView!
     
@@ -19,7 +20,7 @@ class KeywordCell: UICollectionViewCell {
             }
         }
         
-        var removeButtonPressed: (SearchHistory?) -> Void = { (sender) in }
+   var removeButtonPressed: (SearchHistory?) -> Void = { (sender) in }
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -30,7 +31,9 @@ class KeywordCell: UICollectionViewCell {
     func configureUI(){
           backView.clipsToBounds = true
           backView.layer.cornerRadius = 15
-        backView.backgroundColor = #colorLiteral(red: 0.921431005, green: 0.9214526415, blue: 0.9214410186, alpha: 1)
+        backView.backgroundColor = UIColor(hexCode: Color.lightMainColor)
+        
+        removeButton.tintColor = UIColor(hexCode: Color.mainColor)
       }
       
       func setupDatas(){

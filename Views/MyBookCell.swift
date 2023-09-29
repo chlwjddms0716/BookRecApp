@@ -13,6 +13,8 @@ class MyBookCell: UICollectionViewCell {
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var authorLabel: UILabel!
     
+    var removeButtonPressed: (Book) -> Void = { (sender) in }
+    
     var book: Book? {
         didSet{
             setupDatas()
@@ -27,7 +29,7 @@ class MyBookCell: UICollectionViewCell {
     
     func configureUI(){
         
-        coverImageView.layer.borderColor = UIColor(hexCode: "EFEDED").cgColor
+        coverImageView.layer.borderColor = UIColor(hexCode: Color.imageBorderColor).cgColor
         coverImageView.layer.borderWidth = 1
         
         coverImageView.clipsToBounds = true
@@ -49,4 +51,9 @@ class MyBookCell: UICollectionViewCell {
         }
     }
     
+    @IBAction func removeButtonTapped(_ sender: UIButton) {
+        if let bookData = book {
+            removeButtonPressed(bookData)
+        }
+    }
 }

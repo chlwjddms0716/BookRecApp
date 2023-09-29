@@ -8,34 +8,43 @@
 import UIKit
 
 class DetailViewController: UIViewController {
-
     
+    
+    @IBOutlet weak var closeButton: UIButton!
+    @IBOutlet weak var backView: UIView!
     @IBOutlet weak var selectButton: UIButton!
     @IBOutlet weak var descriptionLabel: UILabel!
     @IBOutlet weak var authorLabel: UILabel!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var coverImageView: UIImageView!
     
-    let networkManager = NetworkManager.shared
-    let databaseManager = DatabaseManager.shared
+    private let networkManager = NetworkManager.shared
+    private let databaseManager = DatabaseManager.shared
     
     var book: Book? {
         didSet{
             setupData()
-            loadImage()
+            //loadImage()
         }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         configureUI()
     }
     
     func configureUI(){
+        
         if let book = book{
             titleLabel.text = book.title
             authorLabel.text = book.authors
+            
+            UIImage().loadImage(imageUrl: book.bookImageURL, completion: { image in
+                DispatchQueue.main.async {
+                    self.coverImageView.image = image
+                }
+            })
         }
         
         coverImageView.layer.cornerRadius = 5
@@ -43,19 +52,28 @@ class DetailViewController: UIViewController {
         coverImageView.clipsToBounds = true
         coverImageView.layer.borderColor = UIColor(hexCode: "EFEDED").cgColor
         
-        selectButton.layer.cornerRadius = selectButton.frame.height / 2
+        selectButton.layer.cornerRadius = 10
         selectButton.clipsToBounds = true
+        selectButton.backgroundColor =  UIColor(hexCode: Color.mainColor)
+        selectButton.setTitleColor(.white, for: .normal)
+        
+        backView.clipsToBounds = true
+        backView.backgroundColor = UIColor(hexCode: Color.bookBackColor)
+        
+        titleLabel.textColor = .black
+        authorLabel.textColor = .lightGray
+        closeButton.tintColor = UIColor(hexCode: Color.mainColor)
     }
     
-
+    
     func setupData(){
         if let book = book, let bookISBN = book.isbn {
             
-            networkManager.getBookDescription(isbn: bookISBN ){ result in
+            networkManager.fetchBookDescription(isbn: bookISBN ){ result in
                 switch result{
                 case .success(let bookData):
-                   
-                print(bookData)
+                    
+                    print(bookData)
                     DispatchQueue.main.async {
                         self.descriptionLabel.text = bookData
                     }
@@ -63,23 +81,12 @@ class DetailViewController: UIViewController {
                     print(error.localizedDescription)
                 }
             }
+            
+            
         }
     }
     
-    func loadImage() {
-        if let book = book, let imgUrl = book.bookImageURL, let url = URL(string: imgUrl){
-            DispatchQueue.global().async { [weak self] in
-                if let data = try? Data(contentsOf: url) {
-                    if let image = UIImage(data: data) {
-                        DispatchQueue.main.async {
-                            self?.coverImageView.image = image
-                        }
-                    }
-                }
-            }
-        }
-    }
-
+   
     // MARK: - 서재에 담기 버튼 클릭
     @IBAction func selectButtonTapped(_ sender: UIButton) {
         
@@ -104,5 +111,10 @@ class DetailViewController: UIViewController {
                 self.present(alert, animated: true)
             }
         }
+    }
+    
+    
+    @IBAction func closeButtonTapped(_ sender: UIButton) {
+        self.dismiss(animated: true)
     }
 }

@@ -22,13 +22,10 @@ public struct DatabaseManager {
     private let ref = Database.database().reference()
     
     func createUser(user: User){
-        let userItemRef = ref.child("User")
+        let userItemRef = ref.child("User").child(user.uid)
         let dataToSave: [String: Any] = [
-            user.uid :
-                [ 
-                  "selectBook" : "" ,
-                  "searchHistory" : ""
-                ]
+            "selectBook" : "" ,
+            "searchHistory" : ""
         ]
         
         getAllUsers { userData in
@@ -158,7 +155,7 @@ public struct DatabaseManager {
         guard let userID = Auth.auth().currentUser?.uid else { return }
         
         ref.child("User").child(userID).child("searchHistory").observeSingleEvent(of: .value, with: { snapshot in
-            
+           
             guard let searchData = snapshot.value as? [String : Any] else {
                 completion(nil)
                 return
@@ -166,11 +163,11 @@ public struct DatabaseManager {
             
             do{
                 let data = try? JSONSerialization.data(withJSONObject: Array(searchData.values), options: [])
-                
+               
                 let decoder = JSONDecoder()
                 if let safeData = data {
                     let searchHistory = try? decoder.decode([SearchHistory].self, from: safeData)
-                    
+                   
                     if let safeHistory = searchHistory {
                         let sortedSearchHistory = safeHistory.sorted(by: { term1, term2 in
                             return term1.timestamp > term2.timestamp
@@ -178,10 +175,13 @@ public struct DatabaseManager {
                         completion(sortedSearchHistory)
                         return
                     }
+                    
+                    completion(nil)
                 }
                 
                 completion(nil)
             }catch{
+            
                 completion(nil)
             }
         }) { error in
@@ -213,7 +213,19 @@ public struct DatabaseManager {
                 print("데이터가 성공적으로 삭제되었습니다.")
             }
         }
+    }
+    
+    func removeMyBook(bookData: Book, completion: @escaping () -> (Void)){
+        guard let user = Auth.auth().currentUser else { return }
         
+        ref.child("User").child(user.uid).child("selectBook").queryOrdered(byChild: "isbn").queryStarting(atValue: bookData.isbn).queryEnding(atValue: "\(String(describing: bookData.isbn))\\uf8ff").observeSingleEvent(of: .value) { snapshot in
+            
+            guard let safeData = snapshot.value as? [String : Any], let key = safeData.keys.first else { return }
+            
+            ref.child("User").child(user.uid).child("selectBook").child(key).removeValue { Error, reference in
+                 completion()
+            }
+        }
     }
 }
 

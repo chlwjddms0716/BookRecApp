@@ -6,12 +6,15 @@
 //
 
 import UIKit
+import AlignedCollectionViewFlowLayout
 
 class ViewController: UIViewController {
     
+    @IBOutlet weak var categoryCollectionView: UICollectionView!
+    @IBOutlet weak var bookCollectionView: UICollectionView!
+
+    @IBOutlet weak var searchBarView: UIView!
     @IBOutlet weak var loadingIndicatorVIew: UIActivityIndicatorView!
-    
-    @IBOutlet weak var bookTableView: UITableView!
     
     var bookArray: [Book] = []
     
@@ -20,13 +23,44 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupDatas()
-        setupTableView()
+        configureUI()
+        setupCollectionView()
+       setupTabbar()
+       setupDatas()
     }
+
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        bookTableView.reloadData()
+        bookCollectionView.reloadData()
+    }
+    
+    func configureUI(){
+        searchBarView.clipsToBounds = true
+        searchBarView.layer.cornerRadius = 10
+        searchBarView.backgroundColor = UIColor(hexCode: Color.lightGrayColor)
+        searchBarView.layer.borderWidth = 1
+        searchBarView.layer.borderColor = UIColor(hexCode: Color.grayColor).cgColor
+        
+        let searchBarclick = UITapGestureRecognizer(target: self
+                                              , action: #selector(searchBarTapped))
+        searchBarView.addGestureRecognizer(searchBarclick)
+        searchBarView.isUserInteractionEnabled = true
+    }
+    
+    func setupTabbar(){
+        if let tabBar = self.tabBarController?.tabBar {
+            tabBar.layer.shadowColor = UIColor.lightGray.cgColor
+            tabBar.layer.shadowOpacity = 0.3
+            tabBar.layer.shadowOffset = CGSize.zero
+            tabBar.layer.shadowRadius = 5
+            tabBar.layer.borderColor = UIColor.clear.cgColor
+            tabBar.layer.borderWidth = 0
+            tabBar.clipsToBounds = false
+            tabBar.backgroundColor = UIColor.white
+            UITabBar.appearance().shadowImage = UIImage()
+            UITabBar.appearance().backgroundImage = UIImage()
+        }
     }
     
     func showIndicator(){
@@ -39,9 +73,16 @@ class ViewController: UIViewController {
         loadingIndicatorVIew.stopAnimating()
     }
 
-    func setupTableView(){
-        bookTableView.delegate = self
-        bookTableView.dataSource = self
+    
+    func setupCollectionView(){
+
+        bookCollectionView.dataSource = self
+        bookCollectionView.delegate = self
+        bookCollectionView.register(UINib(nibName: Cell.mainBookCellIdentifier, bundle: nil), forCellWithReuseIdentifier: Cell.mainBookCellIdentifier)
+        
+        categoryCollectionView.delegate = self
+        categoryCollectionView.dataSource = self
+        categoryCollectionView.register(UINib(nibName: Cell.categoryCellIdentifier, bundle: nil), forCellWithReuseIdentifier: Cell.categoryCellIdentifier)
     }
     
     func setupDatas(){
@@ -54,7 +95,7 @@ class ViewController: UIViewController {
                 self.bookArray = bookArray
                 
                 DispatchQueue.main.async{
-                    self.bookTableView.reloadData()
+                    self.bookCollectionView.reloadData()
                     self.hideIndicator()
                 }
                 
@@ -63,39 +104,83 @@ class ViewController: UIViewController {
             }
         }
     }
+    
+    @objc func searchBarTapped(){
+      
+        self.tabBarController?.selectedIndex = 0
+    }
+    
+    
+    @IBAction func seeMoreTapped(_ sender: UIButton) {
+        if bookArray.count > 0 {
+            let vc = storyboard?.instantiateViewController(withIdentifier: "SearchBookViewController") as! SearchBookViewController
+            vc.mainBookList = bookArray
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+    }
 }
 
 
 // MARK: - 테이블뷰 DataSource
-extension ViewController: UITableViewDataSource{
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return bookArray.count
+extension ViewController: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if collectionView == bookCollectionView {
+            return bookArray.count > 10 ? 10 : bookArray.count
+        }
+        else{
+            return CategoryManager.categoryArray.count
+        }
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = bookTableView.dequeueReusableCell(withIdentifier: Cell.bookCellIdentifier, for: indexPath) as! bookCell
-        
-        cell.bookData = bookArray[indexPath.row]
-        
-        cell.selectionStyle = .none
-        
-        return cell
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if collectionView == bookCollectionView {
+            guard  let cell = bookCollectionView.dequeueReusableCell(withReuseIdentifier: Cell.mainBookCellIdentifier, for: indexPath) as? MainBookCell else { return UICollectionViewCell()}
+            cell.bookData = bookArray[indexPath.row]
+            
+            return cell
+        }
+        else {
+            guard let cell = categoryCollectionView.dequeueReusableCell(withReuseIdentifier: Cell.categoryCellIdentifier, for: indexPath) as? CategoryCell else { return UICollectionViewCell()}
+            
+            cell.category = CategoryManager.categoryArray[indexPath.row]
+            
+            return cell
+        }
     }
+
+    
 }
 
 // MARK: - 테이블뷰 Delegate
-extension ViewController: UITableViewDelegate{
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 120
+extension ViewController: UICollectionViewDelegateFlowLayout , UICollectionViewDelegate{
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if collectionView == bookCollectionView {
+            let vc = storyboard?.instantiateViewController(withIdentifier: "DetailViewController") as! DetailViewController
+            vc.book = bookArray[indexPath.row]
+            self.present(vc, animated: true)
+        }
+        else
+        {
+            let vc = storyboard?.instantiateViewController(withIdentifier: "SearchBookViewController") as! SearchBookViewController
+            vc.category = CategoryManager.categoryArray[indexPath.row]
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-       guard let vc = storyboard?.instantiateViewController(withIdentifier: "DetailViewController") as? DetailViewController else { return }
-        
-        vc.book = bookArray[indexPath.row]
-        self.present(vc, animated: true)
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return CGFloat(-1)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if collectionView == categoryCollectionView {
+            return CGSize(width: CategoryCVCell.width , height: CategoryCVCell.height)
+        }
+        else {
+           
+            return CGSize(width: MainCVCell.width, height: MainCVCell.height)
+        }
     }
 }
 

@@ -18,12 +18,10 @@ class MyViewController: UIViewController {
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var userImageView: UIImageView!
     
-    let flowLayout = UICollectionViewFlowLayout()
+   private let networkManager = NetworkManager.shared
     
-    let networkManager = NetworkManager.shared
-    
-    let databaseManager = DatabaseManager.shared
-    var bookArray: [Book] = []
+  private  let databaseManager = DatabaseManager.shared
+  private  var bookArray: [Book] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,13 +54,13 @@ class MyViewController: UIViewController {
             self.myCollectionView.reloadData()
         }
         
-        if let user = Auth.auth().currentUser {
+        if Auth.auth().currentUser != nil {
             showIndicator()
             self.guideLabel.isHidden = true
             
             databaseManager.getSelectBook { bookData in
                 if let books = bookData {
-                    self.networkManager.getMyBookList(bookList: books) {  bookData in
+                    self.networkManager.fetchMyBookList(bookList: books) {  bookData in
                         self.bookArray = bookData
                         
                         DispatchQueue.main.async {
@@ -112,18 +110,14 @@ class MyViewController: UIViewController {
         
         myCollectionView.dataSource = self
         myCollectionView.backgroundColor = .white
-        // 컬렉션뷰의 스크롤 방향 설정
+        
+        let flowLayout = UICollectionViewFlowLayout()
         flowLayout.scrollDirection = .vertical
-        
         let collectionCellWidth = (UIScreen.main.bounds.width - CVCell.spacingWitdh * (CVCell.cellColumns - 1)) / CVCell.cellColumns
-        
         flowLayout.itemSize = CGSize(width: collectionCellWidth, height: collectionCellWidth + CVCell.addHeight )
-        // 아이템 사이 간격 설정
         flowLayout.minimumInteritemSpacing = CVCell.spacingWitdh
-        // 아이템 위아래 사이 간격 설정
         flowLayout.minimumLineSpacing = CVCell.spacingWitdh
-        
-        // 컬렉션뷰의 속성에 할당
+
         myCollectionView.collectionViewLayout = flowLayout
     }
     
@@ -176,10 +170,10 @@ class MyViewController: UIViewController {
         print("로그인 이용자 : \(String(describing: user.displayName))")
         
         nameLabel.textColor = .black
-        nameLabel.text = user.displayName
+        nameLabel.text = user.displayName ?? "이용자"
       
         
-        UIImage().loadImage(imageUrl: user.photoURL?.absoluteString){ image in
+        UIImage().loadImage(imageUrl: user.photoURL?.absoluteString, isUser: true){ image in
             DispatchQueue.main.async {
                 self.userImageView.image = image
             }
@@ -226,6 +220,19 @@ extension MyViewController : UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         guard let cell = myCollectionView.dequeueReusableCell(withReuseIdentifier: Cell.myBookCellIdentifier, for: indexPath) as? MyBookCell else { return UICollectionViewCell() }
+        cell.removeButtonPressed = { book in
+            self.bookArray.removeAll(where: {$0.isbn == book.isbn})
+            DispatchQueue.main.async {
+                self.myCollectionView.reloadData()
+                if self.bookArray.count == 0 {
+                    self.guideLabel.isHidden = false
+                    self.guideLabel.text = "도서를 서재에 담아보세요!"
+                }
+            }
+            self.databaseManager.removeMyBook(bookData: book) {
+                print("내 서재 도서 삭제 완료")
+            }
+        }
         
         cell.book = bookArray[indexPath.row]
         
