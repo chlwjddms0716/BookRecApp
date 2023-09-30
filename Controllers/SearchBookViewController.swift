@@ -54,6 +54,7 @@ class SearchBookViewController: ExtensionVC {
     }
     
     func showIndicator(){
+        
         DispatchQueue.main.async {
             self.sv = UIViewController.displaySpinner(onView: self.view)
         }
